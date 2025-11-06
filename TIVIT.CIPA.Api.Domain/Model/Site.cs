@@ -7,5 +7,9 @@
         public string ProtheusCode { get; set; }
         public string Name { get; set; }
         public bool IsActive { get; set; }
+
+        public virtual Company Company { get; set; }
+        public virtual ICollection<Candidate> Candidates { get; set; }
+        public virtual ICollection<ElectionSite> ElectionSites { get; set; }
     }
 }

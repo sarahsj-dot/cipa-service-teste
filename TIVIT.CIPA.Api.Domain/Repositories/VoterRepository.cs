@@ -49,5 +49,10 @@ namespace TIVIT.CIPA.Api.Domain.Repositories
         {
             return _dbContext.Voters.Any(x => x.Id == id);
         }
+
+        public Task CreateRangeAsync(IEnumerable<Voter> voters)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

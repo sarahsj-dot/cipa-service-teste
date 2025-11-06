@@ -23,6 +23,19 @@ namespace TIVIT.CIPA.Api.Security
 
         public string Role => _httpContext.GetRole();
 
+        public int CompanyId
+        {
+            get
+            {
+                var companyIdClaim = _httpContext.User.FindFirstValue("companyId");
+
+                if (int.TryParse(companyIdClaim, out int companyId))
+                    return companyId;
+
+                return 0; 
+            }
+        }
+
         public string Language
         {
             get

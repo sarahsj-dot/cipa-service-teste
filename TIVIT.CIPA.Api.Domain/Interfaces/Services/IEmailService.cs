@@ -1,4 +1,4 @@
-﻿using TIVIT.CIPA.Api.Domain.Model.Services;
+﻿using TIVIT.CIPA.Api.Domain.Model.Requests;
 
 namespace TIVIT.CIPA.Api.Domain.Interfaces.Services
 {

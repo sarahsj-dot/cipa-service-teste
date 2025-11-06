@@ -1,22 +1,12 @@
-﻿using Azure.Core;
-using ClosedXML.Excel;
-using DocumentFormat.OpenXml.Bibliography;
-using DocumentFormat.OpenXml.Wordprocessing;
-using Microsoft.Extensions.Localization;
-using Microsoft.Graph;
-using System.Security.Policy;
+﻿using Microsoft.Extensions.Localization;
 using System.Text.RegularExpressions;
 using TIVIT.CIPA.Api.Domain.Interfaces.Business;
 using TIVIT.CIPA.Api.Domain.Interfaces.Models;
 using TIVIT.CIPA.Api.Domain.Interfaces.Repositories;
-using TIVIT.CIPA.Api.Domain.Interfaces.Services;
 using TIVIT.CIPA.Api.Domain.Model;
 using TIVIT.CIPA.Api.Domain.Model.Requests;
 using TIVIT.CIPA.Api.Domain.Model.Responses;
-using TIVIT.CIPA.Api.Domain.Model.Services;
-using TIVIT.CIPA.Api.Domain.Providers;
 using TIVIT.CIPA.Api.Domain.Resources;
-using TIVIT.CIPA.Api.Domain.Settings;
 using TIVIT.CIPA.Api.Domain.Validators;
 
 namespace TIVIT.CIPA.Api.Domain.Business
@@ -35,7 +25,6 @@ namespace TIVIT.CIPA.Api.Domain.Business
             _userInfo = userInfo;
             _candidateRepository = candidateRepository;
             _localizer = localizer;
-
         }
 
         public async Task<Response<CandidateDetailResponse>> GetByIdAsync(int id)
@@ -47,7 +36,9 @@ namespace TIVIT.CIPA.Api.Domain.Business
             if (candidate == null)
                 return response;
 
-            var photoBase64 = $"data:{candidate.PhotoMimeType};base64,{Convert.ToBase64String(candidate.PhotoBase64)}";
+            var photoBase64 = candidate.PhotoBase64 != null
+                ? $"data:{candidate.PhotoMimeType};base64,{Convert.ToBase64String(candidate.PhotoBase64)}"
+                : null;
 
             response.Data = new CandidateDetailResponse()
             {
@@ -58,14 +49,18 @@ namespace TIVIT.CIPA.Api.Domain.Business
                 SiteId = candidate.SiteId,
                 PhotoBase64 = photoBase64,
                 IsActive = candidate.IsActive,
-                Site = candidate.Site != null? new SiteResponse()
+                CorporateId = candidate.CorporateId,
+                BirthDate = candidate.BirthDate,
+                AdmissionDate = candidate.AdmissionDate,
+                Department = candidate.Department,
+                Site = candidate.SiteNavigation != null ? new SiteResponse()
                 {
-                    Id = candidate.Site.Id,
-                    CompanyId = candidate.Site.CompanyId,
-                    ProtheusCode = candidate.Site.ProtheusCode,
-                    IsActive = candidate.Site.IsActive,
-                    Name = candidate.Site.Name
-                }:null
+                    Id = candidate.SiteNavigation.Id,
+                    CompanyId = candidate.SiteNavigation.CompanyId,
+                    ProtheusCode = candidate.SiteNavigation.ProtheusCode,
+                    IsActive = candidate.SiteNavigation.IsActive,
+                    Name = candidate.SiteNavigation.Name
+                } : null
             };
 
             return response;
@@ -87,23 +82,29 @@ namespace TIVIT.CIPA.Api.Domain.Business
                 Name = x.Name,
                 Area = x.Area,
                 SiteId = x.SiteId,
-                PhotoBase64 = $"data:{x.PhotoMimeType};base64,{Convert.ToBase64String(x.PhotoBase64)}",
+                PhotoBase64 = x.PhotoBase64 != null
+                    ? $"data:{x.PhotoMimeType};base64,{Convert.ToBase64String(x.PhotoBase64)}"
+                    : null,
                 IsActive = x.IsActive,
-                Site = x.Site != null ? new SiteResponse()
+                CorporateId = x.CorporateId,
+                BirthDate = x.BirthDate,
+                AdmissionDate = x.AdmissionDate,
+                Department = x.Department,
+                Site = x.SiteNavigation != null ? new SiteResponse()
                 {
-                    Id = x.Site.Id,
-                    CompanyId = x.Site.CompanyId,
-                    ProtheusCode = x.Site.ProtheusCode,
-                    IsActive = x.Site.IsActive,
-                    Name = x.Site.Name
+                    Id = x.SiteNavigation.Id,
+                    CompanyId = x.SiteNavigation.CompanyId,
+                    ProtheusCode = x.SiteNavigation.ProtheusCode,
+                    IsActive = x.SiteNavigation.IsActive,
+                    Name = x.SiteNavigation.Name
                 } : null
             });
-
 
             return response;
         }
 
-        public async Task<Response<IEnumerable<CandidateResumeResponse>>> SearchCandidateAsync(string name, int? electionId, bool? isActive, int? siteId)
+        public async Task<Response<IEnumerable<CandidateResumeResponse>>> SearchCandidateAsync(
+            string name, int? electionId, bool? isActive, int? siteId)
         {
             var response = new Response<IEnumerable<CandidateResumeResponse>>();
 
@@ -122,10 +123,8 @@ namespace TIVIT.CIPA.Api.Domain.Business
                 IsActive = x.IsActive
             });
 
-
             return response;
         }
-
 
         public async Task<Response<int>> CreateAsync(CandidateCreateRequest createRequest)
         {
@@ -134,10 +133,9 @@ namespace TIVIT.CIPA.Api.Domain.Business
             byte[] photoBytes = null;
             string mimeType = null;
             string base64Data = null;
+
             try
             {
-
-
                 if (!string.IsNullOrEmpty(createRequest.PhotoBase64))
                 {
                     base64Data = createRequest.PhotoBase64;
@@ -157,13 +155,11 @@ namespace TIVIT.CIPA.Api.Domain.Business
                         mimeType = GetImageMimeType(photoBytes);
                     }
                 }
-
             }
             catch (Exception)
             {
                 throw new ArgumentException("Formato de imagem (Base64) inválido.");
             }
-
 
             var validator = new CandidateValidator(_candidateRepository, _localizer);
             validator.ValidateCreate(createRequest, photoBytes, mimeType);
@@ -173,16 +169,16 @@ namespace TIVIT.CIPA.Api.Domain.Business
                 return response;
             }
 
-
-
-
-            var candiate = new Candidate()
+            var candidate = new Candidate()
             {
                 ElectionId = createRequest.ElectionId,
                 CorporateId = createRequest.CorporateId,
                 Name = createRequest.Name,
                 Area = createRequest.Area,
                 SiteId = createRequest.SiteId,
+                BirthDate = createRequest.BirthDate,
+                AdmissionDate = createRequest.AdmissionDate,
+                Department = createRequest.Department,
                 PhotoBase64 = photoBytes,
                 PhotoMimeType = mimeType,
                 IsActive = true,
@@ -190,9 +186,9 @@ namespace TIVIT.CIPA.Api.Domain.Business
                 CreateUser = _userInfo.Upn
             };
 
-            await _candidateRepository.CreateAsync(candiate);
+            await _candidateRepository.CreateAsync(candidate);
 
-            response.Data = candiate.Id;
+            response.Data = candidate.Id;
 
             return response;
         }
@@ -204,10 +200,9 @@ namespace TIVIT.CIPA.Api.Domain.Business
             byte[] photoBytes = null;
             string mimeType = null;
             string base64Data = null;
+
             try
             {
-
-
                 if (!string.IsNullOrEmpty(updateRequest.PhotoBase64))
                 {
                     base64Data = updateRequest.PhotoBase64;
@@ -227,7 +222,6 @@ namespace TIVIT.CIPA.Api.Domain.Business
                         mimeType = GetImageMimeType(photoBytes);
                     }
                 }
-
             }
             catch (Exception)
             {
@@ -244,13 +238,22 @@ namespace TIVIT.CIPA.Api.Domain.Business
 
             var candidate = await this._candidateRepository.GetByIdAsync(id);
 
+            if (candidate == null)
+            {
+                response.AddMessage("Candidato não encontrado.");
+                return response;
+            }
+
             candidate.ElectionId = updateRequest.ElectionId;
             candidate.CorporateId = updateRequest.CorporateId;
             candidate.Name = updateRequest.Name;
             candidate.Area = updateRequest.Area;
             candidate.SiteId = updateRequest.SiteId;
-            candidate.PhotoBase64 = photoBytes;
-            candidate.PhotoMimeType = mimeType;
+            candidate.BirthDate = updateRequest.BirthDate;
+            candidate.AdmissionDate = updateRequest.AdmissionDate;
+            candidate.Department = updateRequest.Department;
+            candidate.PhotoBase64 = photoBytes ?? candidate.PhotoBase64;
+            candidate.PhotoMimeType = mimeType ?? candidate.PhotoMimeType;
             candidate.UpdateDate = DateTime.Now;
             candidate.UpdateUser = _userInfo.Upn;
 
@@ -273,6 +276,12 @@ namespace TIVIT.CIPA.Api.Domain.Business
 
             var candidate = await this._candidateRepository.GetByIdAsync(id);
 
+            if (candidate == null)
+            {
+                response.AddMessage("Candidato não encontrado.");
+                return response;
+            }
+
             candidate.IsActive = isActive;
             candidate.UpdateDate = DateTime.Now;
             candidate.UpdateUser = _userInfo.Upn;
@@ -283,7 +292,7 @@ namespace TIVIT.CIPA.Api.Domain.Business
         }
 
         #region "Private Methods"
-        private string GetImageMimeType(byte[] imageBytes)
+        private static string GetImageMimeType(byte[] imageBytes)
         {
             if (imageBytes.Length < 4)
                 return "application/octet-stream";
@@ -304,7 +313,7 @@ namespace TIVIT.CIPA.Api.Domain.Business
             if (imageBytes[0] == 0x42 && imageBytes[1] == 0x4D)
                 return "image/bmp";
 
-            return "application/octet-stream"; // tipo genérico
+            return "application/octet-stream";
         }
         #endregion
     }

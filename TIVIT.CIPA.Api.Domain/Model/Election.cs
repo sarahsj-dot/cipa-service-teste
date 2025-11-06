@@ -1,19 +1,33 @@
-﻿
-
-namespace TIVIT.CIPA.Api.Domain.Model
+﻿namespace TIVIT.CIPA.Api.Domain.Model
 {
     public class Election
     {
         public int Id { get; set; }
+        public int CompanyId { get; set; }
+        public string Code { get; set; }
         public string Name { get; set; }
-        public DateTime ElectionStartDate { get; set; }
-        public DateTime ElectionEndDate { get; set; }
+        public string Description { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public DateTime? RegistrationStartDate { get; set; }
+        public DateTime? RegistrationEndDate { get; set; }
+        public DateTime? ElectionStartDate { get; set; }
+        public DateTime? ElectionEndDate { get; set; }
+        public string Type { get; set; } // Regular, Emergency
+        public string InvitationMessage { get; set; }
         public bool IsActive { get; set; }
         public DateTime? CreateDate { get; set; }
         public string CreateUser { get; set; }
         public DateTime? UpdateDate { get; set; }
         public string UpdateUser { get; set; }
-        
 
+
+        public virtual Company Company { get; set; }
+        public virtual ICollection<Voter> Voters { get; set; }
+        public virtual ICollection<Candidate> Candidates { get; set; }
+        public virtual ICollection<Vote> Votes { get; set; }
+        public virtual ICollection<VoteLog> VoteLogs { get; set; }
+        public virtual ICollection<ExclusionLog> ExclusionLogs { get; set; }
+        public virtual ICollection<ElectionSite> ElectionSites { get; set; }
     }
 }

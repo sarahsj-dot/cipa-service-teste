@@ -1,14 +1,8 @@
-﻿using DocumentFormat.OpenXml.Wordprocessing;
-using Microsoft.Extensions.Localization;
+﻿using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Globalization;
-using System.Net;
-using TIVIT.CIPA.Api.Domain.Interfaces.Repositories;
 using TIVIT.CIPA.Api.Domain.Interfaces.Services;
-using TIVIT.CIPA.Api.Domain.Interfaces.Services.Azure;
 using TIVIT.CIPA.Api.Domain.Model.Services;
-using TIVIT.CIPA.Api.Domain.Repositories;
 using TIVIT.CIPA.Api.Domain.Resources;
 using TIVIT.CIPA.Api.Domain.Settings;
 
@@ -64,6 +58,11 @@ namespace TIVIT.CIPA.Api.Domain.Services
             content = content.Replace("##LINK##", link);
 
             return content;
+        }
+
+        public Task SendUserFirstAccessContentAsync(Model.Requests.UserFirstAccessEmailRequest request)
+        {
+            throw new NotImplementedException();
         }
     }
 }

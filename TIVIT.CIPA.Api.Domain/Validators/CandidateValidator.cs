@@ -14,9 +14,7 @@ namespace TIVIT.CIPA.Api.Domain.Validators
         private readonly IStringLocalizer<SharedResource> _localizer;
 
         private const int MaxImageSizeBytes = 3 * 1024 * 1024; // 3 MB
-
         private static readonly string[] AllowedMimeTypes = { "image/jpeg", "image/jpg", "image/png" };
-
 
         public CandidateValidator(
             ICandidateRepository candidateRepository,
@@ -28,10 +26,8 @@ namespace TIVIT.CIPA.Api.Domain.Validators
 
         public void ValidateCreate(CandidateCreateRequest request, byte[] photoBytes, string mimeType)
         {
-
             AddNotifications(new Contract<CandidateCreateRequest>()
                 .Requires()
-
                 .IsNotNullOrWhiteSpace(request.Name, "Name", "Nome do candidato é obrigatório")
                 .IsNotNullOrWhiteSpace(request.CorporateId, "CorporateId", "Matricula é obrigatório")
                 .IsGreaterThan(request.ElectionId, 0, "ElectionId", "ElectionId inválido")
@@ -47,18 +43,14 @@ namespace TIVIT.CIPA.Api.Domain.Validators
                 return;
             }
 
-            // Valida Base64 e tamanho
-            if (photoBytes.Length > MaxImageSizeBytes)
+            if (photoBytes != null && photoBytes.Length > MaxImageSizeBytes)
                 AddNotification(nameof(request.PhotoBase64), "A imagem não pode ultrapassar 3 MB.");
-
-
         }
 
         public void ValidateUpdate(int id, CandidateUpdateRequest request, byte[] photoBytes, string mimeType)
         {
             AddNotifications(new Contract<CandidateUpdateRequest>()
                 .Requires()
-
                 .IsNotNullOrWhiteSpace(request.Name, "Name", "Nome do candidato é obrigatório")
                 .IsNotNullOrWhiteSpace(request.CorporateId, "CorporateId", "Matricula é obrigatório")
                 .IsGreaterThan(request.ElectionId, 0, "ElectionId", "ElectionId inválido")
@@ -74,24 +66,16 @@ namespace TIVIT.CIPA.Api.Domain.Validators
                 return;
             }
 
-            // Valida Base64 e tamanho
-            if (photoBytes.Length > MaxImageSizeBytes)
+            if (photoBytes != null && photoBytes.Length > MaxImageSizeBytes)
                 AddNotification(nameof(request.PhotoBase64), "A imagem não pode ultrapassar 3 MB.");
-
-
         }
 
         public void ValidateChangeActive(int id)
         {
             var candidateExists = _candidateRepository.ExistsById(id);
-
             AddNotifications(new Contract<CandidateCreateRequest>()
                 .IsTrue(candidateExists, "ExistCandidate", "Candidato não existe")
             );
         }
-
-        //public bool ExistsActiveByName(string name, int? ignoreId = null) => _candidateRepository.ExistsActiveByName(name, ignoreId);
-
-
     }
 }

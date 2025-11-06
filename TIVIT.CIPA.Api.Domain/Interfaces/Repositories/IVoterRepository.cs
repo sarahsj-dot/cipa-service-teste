@@ -1,5 +1,4 @@
-﻿
-using TIVIT.CIPA.Api.Domain.Model;
+﻿using TIVIT.CIPA.Api.Domain.Model;
 
 namespace TIVIT.CIPA.Api.Domain.Interfaces.Repositories
 {
@@ -9,8 +8,7 @@ namespace TIVIT.CIPA.Api.Domain.Interfaces.Repositories
         Task<IEnumerable<Voter>> GetByElectionIdAsync(int electionId);
         Task UpdateAsync(Voter voter);
         Task CreateAsync(Voter voter);
+        Task CreateRangeAsync(IEnumerable<Voter> voters);
         bool ExistsById(int id);
     }
 }
-
-
