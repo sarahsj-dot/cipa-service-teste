@@ -10,6 +10,10 @@ namespace TIVIT.CIPA.Api.Domain.Repositories.Config
         {
             builder.ToTable("Site");
             builder.HasKey(r => r.Id);
+            builder.HasOne(r => r.Company)
+                   .WithMany(company => company.Sites)
+                   .HasForeignKey(r => r.CompanyId)
+                   .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
