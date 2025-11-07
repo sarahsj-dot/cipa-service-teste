@@ -16,14 +16,17 @@ namespace TIVIT.CIPA.Api.Domain.Business
         private readonly IUserInfo _userInfo;
         private readonly ICandidateRepository _candidateRepository;
         private readonly IStringLocalizer<SharedResource> _localizer;
+        private readonly IVoterRepository _voterRepository;
 
         public CandidateBusiness(
             IUserInfo userInfo,
             ICandidateRepository candidateRepository,
+            IVoterRepository voterRepository,
             IStringLocalizer<SharedResource> localizer)
         {
             _userInfo = userInfo;
             _candidateRepository = candidateRepository;
+            _voterRepository = voterRepository;
             _localizer = localizer;
         }
 
@@ -36,31 +39,16 @@ namespace TIVIT.CIPA.Api.Domain.Business
             if (candidate == null)
                 return response;
 
-            var photoBase64 = candidate.PhotoBase64 != null
-                ? $"data:{candidate.PhotoMimeType};base64,{Convert.ToBase64String(candidate.PhotoBase64)}"
-                : null;
+            var photoBase64 = $"data:{candidate.PhotoMimeType};base64,{Convert.ToBase64String(candidate.PhotoBase64)}";
 
             response.Data = new CandidateDetailResponse()
             {
                 Id = candidate.Id,
                 ElectionId = candidate.ElectionId,
-                Name = candidate.Name,
-                Area = candidate.Area,
-                SiteId = candidate.SiteId,
+                Name = candidate.Voter.Name,
+                Department = candidate.Voter.Department,
                 PhotoBase64 = photoBase64,
-                IsActive = candidate.IsActive,
-                CorporateId = candidate.CorporateId,
-                BirthDate = candidate.BirthDate,
-                AdmissionDate = candidate.AdmissionDate,
-                Department = candidate.Department,
-                Site = candidate.SiteNavigation != null ? new SiteResponse()
-                {
-                    Id = candidate.SiteNavigation.Id,
-                    CompanyId = candidate.SiteNavigation.CompanyId,
-                    ProtheusCode = candidate.SiteNavigation.ProtheusCode,
-                    IsActive = candidate.SiteNavigation.IsActive,
-                    Name = candidate.SiteNavigation.Name
-                } : null
+                IsActive = candidate.IsActive
             };
 
             return response;
@@ -79,36 +67,22 @@ namespace TIVIT.CIPA.Api.Domain.Business
             {
                 Id = x.Id,
                 ElectionId = x.ElectionId,
-                Name = x.Name,
-                Area = x.Area,
-                SiteId = x.SiteId,
-                PhotoBase64 = x.PhotoBase64 != null
-                    ? $"data:{x.PhotoMimeType};base64,{Convert.ToBase64String(x.PhotoBase64)}"
-                    : null,
+                Name = x.Voter.Name,
+                Department = x.Voter.Department,
+                PhotoBase64 = x.PhotoBase64 != null && x.PhotoBase64.Length > 0
+                ? $"data:{x.PhotoMimeType};base64,{Convert.ToBase64String(x.PhotoBase64)}"
+                : null,
                 IsActive = x.IsActive,
-                CorporateId = x.CorporateId,
-                BirthDate = x.BirthDate,
-                AdmissionDate = x.AdmissionDate,
-                Department = x.Department,
-                Site = x.SiteNavigation != null ? new SiteResponse()
-                {
-                    Id = x.SiteNavigation.Id,
-                    CompanyId = x.SiteNavigation.CompanyId,
-                    ProtheusCode = x.SiteNavigation.ProtheusCode,
-                    IsActive = x.SiteNavigation.IsActive,
-                    Name = x.SiteNavigation.Name
-                } : null
             });
 
             return response;
         }
 
-        public async Task<Response<IEnumerable<CandidateResumeResponse>>> SearchCandidateAsync(
-            string name, int? electionId, bool? isActive, int? siteId)
+        public async Task<Response<IEnumerable<CandidateResumeResponse>>> SearchCandidateAsync(string name, int electionId, int? siteId = null, string? corporateid = null, string? departament = null)
         {
             var response = new Response<IEnumerable<CandidateResumeResponse>>();
 
-            var candidates = await this._candidateRepository.SearchAsync(name, electionId, isActive, siteId);
+            var candidates = await this._candidateRepository.SearchAsync(name, electionId, siteId, corporateid, departament);
 
             if (candidates == null)
                 return response;
@@ -117,9 +91,9 @@ namespace TIVIT.CIPA.Api.Domain.Business
             {
                 Id = x.Id,
                 ElectionId = x.ElectionId,
-                CorporateId = x.CorporateId,
-                Name = x.Name,
-                Area = x.Area,
+                Site = x.Site.Name,
+                Name = x.Voter.Name,
+                Department = x.Voter.Department,
                 IsActive = x.IsActive
             });
 
@@ -133,7 +107,6 @@ namespace TIVIT.CIPA.Api.Domain.Business
             byte[] photoBytes = null;
             string mimeType = null;
             string base64Data = null;
-
             try
             {
                 if (!string.IsNullOrEmpty(createRequest.PhotoBase64))
@@ -169,16 +142,19 @@ namespace TIVIT.CIPA.Api.Domain.Business
                 return response;
             }
 
+            var voter = await _voterRepository.GetByCorporateIdAsync(createRequest.CorporateId);
+
+            if (voter == null)
+            {
+                response.AddMessage($"Nenhum eleitor encontrado com CorporateId '{createRequest.CorporateId}'.");
+                return response;
+            }
+
             var candidate = new Candidate()
             {
                 ElectionId = createRequest.ElectionId,
-                CorporateId = createRequest.CorporateId,
-                Name = createRequest.Name,
-                Area = createRequest.Area,
                 SiteId = createRequest.SiteId,
-                BirthDate = createRequest.BirthDate,
-                AdmissionDate = createRequest.AdmissionDate,
-                Department = createRequest.Department,
+                VoterID = voter.Id,
                 PhotoBase64 = photoBytes,
                 PhotoMimeType = mimeType,
                 IsActive = true,
@@ -200,7 +176,6 @@ namespace TIVIT.CIPA.Api.Domain.Business
             byte[] photoBytes = null;
             string mimeType = null;
             string base64Data = null;
-
             try
             {
                 if (!string.IsNullOrEmpty(updateRequest.PhotoBase64))
@@ -237,23 +212,13 @@ namespace TIVIT.CIPA.Api.Domain.Business
             }
 
             var candidate = await this._candidateRepository.GetByIdAsync(id);
-
-            if (candidate == null)
-            {
-                response.AddMessage("Candidato não encontrado.");
-                return response;
-            }
+            var voter = await _voterRepository.GetByCorporateIdAsync(updateRequest.CorporateId);
 
             candidate.ElectionId = updateRequest.ElectionId;
-            candidate.CorporateId = updateRequest.CorporateId;
-            candidate.Name = updateRequest.Name;
-            candidate.Area = updateRequest.Area;
             candidate.SiteId = updateRequest.SiteId;
-            candidate.BirthDate = updateRequest.BirthDate;
-            candidate.AdmissionDate = updateRequest.AdmissionDate;
-            candidate.Department = updateRequest.Department;
-            candidate.PhotoBase64 = photoBytes ?? candidate.PhotoBase64;
-            candidate.PhotoMimeType = mimeType ?? candidate.PhotoMimeType;
+            candidate.VoterID = voter.Id;
+            candidate.PhotoBase64 = photoBytes;
+            candidate.PhotoMimeType = mimeType;
             candidate.UpdateDate = DateTime.Now;
             candidate.UpdateUser = _userInfo.Upn;
 
@@ -276,12 +241,6 @@ namespace TIVIT.CIPA.Api.Domain.Business
 
             var candidate = await this._candidateRepository.GetByIdAsync(id);
 
-            if (candidate == null)
-            {
-                response.AddMessage("Candidato não encontrado.");
-                return response;
-            }
-
             candidate.IsActive = isActive;
             candidate.UpdateDate = DateTime.Now;
             candidate.UpdateUser = _userInfo.Upn;
@@ -292,7 +251,8 @@ namespace TIVIT.CIPA.Api.Domain.Business
         }
 
         #region "Private Methods"
-        private static string GetImageMimeType(byte[] imageBytes)
+
+        private string GetImageMimeType(byte[] imageBytes)
         {
             if (imageBytes.Length < 4)
                 return "application/octet-stream";
@@ -313,8 +273,9 @@ namespace TIVIT.CIPA.Api.Domain.Business
             if (imageBytes[0] == 0x42 && imageBytes[1] == 0x4D)
                 return "image/bmp";
 
-            return "application/octet-stream";
+            return "application/octet-stream"; // tipo genérico
         }
-        #endregion
+
+        #endregion "Private Methods"
     }
 }

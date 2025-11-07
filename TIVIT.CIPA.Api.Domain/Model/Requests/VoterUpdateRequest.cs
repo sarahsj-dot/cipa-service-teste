@@ -2,8 +2,8 @@
 {
     public class VoterUpdateRequest
     {
-        public int? ElectionId { get; set; }
-        public int? CompanyId { get; set; }
+        public int ElectionId { get; set; }
+        public int? SiteId { get; set; }
         public int? ProfileId { get; set; }
         public string Registry { get; set; }
         public string Name { get; set; }
