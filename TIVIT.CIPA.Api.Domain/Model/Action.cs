@@ -9,6 +9,6 @@
         public string Description { get; set; }
         public virtual Module Module { get; set; }
         public virtual ICollection<ProfileAction> ProfileActions { get; set; }
-        public virtual ICollection<VoterAction> VoterActions { get; set; }
+        public ICollection<VoterAction> VoterActions { get; set; } = new List<VoterAction>();
     }
 }

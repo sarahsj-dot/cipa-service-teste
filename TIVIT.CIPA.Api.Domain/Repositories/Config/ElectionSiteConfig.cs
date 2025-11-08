@@ -10,7 +10,20 @@ namespace TIVIT.CIPA.Api.Domain.Repositories.Config
         public void Configure(EntityTypeBuilder<ElectionSite> builder)
         {
             builder.ToTable("ElectionSite");
-            builder.HasKey(up => new { up.ElectionId, up.SiteId});
+
+            builder.HasKey(es => new { es.ElectionId, es.SiteId })
+                   .HasName("PK_ElectionSite");
+
+            builder.HasOne(es => es.Election)
+                   .WithMany(e => e.ElectionSites)
+                   .HasForeignKey(es => es.ElectionId)
+                   .HasConstraintName("FK_ElectionSite_Election");
+
+
+            builder.HasOne(es => es.Site)
+                   .WithMany(s => s.ElectionSites)
+                   .HasForeignKey(es => es.SiteId)
+                   .HasConstraintName("FK_ElectionSite_Site");
         }
     }
 }
