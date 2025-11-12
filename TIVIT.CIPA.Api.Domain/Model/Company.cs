@@ -8,10 +8,8 @@
         public string ProtheusCode { get; set; }
         public string Name { get; set; }
         public DateTime CreatedAt { get; set; }
-        public bool IsActive { get; set; }
+        public bool IsActive { get; set; } = true;
 
-        public virtual ICollection<Site> Sites { get; set; }
-        public virtual ICollection<Election> Elections { get; set; }
-        public virtual ICollection<Voter> Voters { get; set; }
+        public ICollection<Site> Sites { get; set; }
     }
 }

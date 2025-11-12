@@ -28,6 +28,12 @@ namespace TIVIT.CIPA.Api.Domain.Repositories
             return await _dbContext.Voters.FindAsync(id);
         }
 
+        public async Task<Voter?> GetByCorporateIdAsync(string corporateId)
+        {
+            return await _dbContext.Voters
+                .FirstOrDefaultAsync(x => x.CorporateId == corporateId);
+        }
+
         public async Task<IEnumerable<Voter>> GetByElectionIdAsync(int electionId)
         {
             return await _dbContext.Voters.Where(x => x.ElectionId == electionId).ToListAsync();
@@ -44,15 +50,10 @@ namespace TIVIT.CIPA.Api.Domain.Repositories
             await _dbContext.Voters.AddAsync(voter);
             await _dbContext.SaveChangesAsync();
         }
-               
+
         public bool ExistsById(int id)
         {
             return _dbContext.Voters.Any(x => x.Id == id);
-        }
-
-        public Task CreateRangeAsync(IEnumerable<Voter> voters)
-        {
-            throw new NotImplementedException();
         }
     }
 }

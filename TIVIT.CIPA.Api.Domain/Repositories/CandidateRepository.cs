@@ -26,58 +26,40 @@ namespace TIVIT.CIPA.Api.Domain.Repositories
         public async Task<Candidate> GetByIdAsync(int id)
         {
             return await _dbContext.Candidates
-                .Include(x=>x.Site)
-                .FirstOrDefaultAsync(x=> x.Id == id);
+                .Include(x => x.Site)
+                .FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<IEnumerable<Candidate>> GetByElectionIdAsync(int electionId)
         {
             return await _dbContext.Candidates
-                .Include(x => x.Site)
+                .Include(x => x.Voter)
+                .Where(x => x.IsActive)
                 .Where(x => x.ElectionId == electionId).ToListAsync();
         }
 
-        public async Task<IEnumerable<Candidate>> SearchAsync(string name, int? electionId = null, bool? isActive = null, int? siteId = null)
+        public async Task<IEnumerable<Candidate>> SearchAsync(string name, int electionId, int? siteId = null, string? corporateId = null, string? department = null)
         {
             var query = _dbContext.Candidates
-                .AsQueryable();
-
-            if (electionId.HasValue)
-                query = query.Where(c => c.ElectionId == electionId.Value);
+                .Include(c => c.Voter)
+                .Include(c => c.Site)
+                .Where(c => c.IsActive)
+                .Where(c => c.ElectionId == electionId);
 
             if (!string.IsNullOrWhiteSpace(name))
-                query = query.Where(c => c.Name.Contains(name));
-
-            if (isActive.HasValue)
-                query = query.Where(c => c.IsActive == isActive.Value);
+                query = query.Where(c => c.Site.Name.Contains(name));
 
             if (siteId.HasValue)
                 query = query.Where(c => c.SiteId == siteId.Value);
 
-            //opção com expressão lambda:
-            //var result = await (
-            //from candidate in _dbContext.Candidates
+            if (!string.IsNullOrWhiteSpace(corporateId))
+                query = query.Where(c => c.Voter.CorporateId == corporateId);
 
-            //where candidate.ElectionId == electionId
-            //   && (string.IsNullOrEmpty(name) || candidate.Name.Contains(name))
-            //   && (!isActive.HasValue || candidate.IsActive == isActive.Value)
-            //   && (!siteId.HasValue || candidate.SiteId == siteId.Value)
-            //select new Candidate
-            //{
-            //    Id = candidate.Id,
-            //    ElectionId = candidate.ElectionId,
-            //    CorporateId = candidate.CorporateId,
-            //    Name = candidate.Name,
-            //    Area = candidate.Area,
-            //    SiteId = candidate.SiteId,
-            //    IsActive = candidate.IsActive,
-            //    PhotoBase64 = candidate.PhotoBase64
-            //}).ToListAsync();
-
+            if (!string.IsNullOrWhiteSpace(department))
+                query = query.Where(c => c.Voter.Department == department);
 
             return await query.ToListAsync();
         }
-
 
         public async Task UpdateAsync(Candidate candidate)
         {
@@ -90,7 +72,6 @@ namespace TIVIT.CIPA.Api.Domain.Repositories
             await _dbContext.Candidates.AddAsync(candidate);
             await _dbContext.SaveChangesAsync();
         }
-
 
         public bool ExistsById(int id)
         {

@@ -113,12 +113,12 @@ namespace TIVIT.CIPA.Api.Controllers
                     await file.CopyToAsync(stream);
                     stream.Seek(0, SeekOrigin.Begin);
 
-                    var companyId = userInfo.CompanyId;
+                    var SiteId = userInfo.SiteID;
 
-                    if (companyId <= 0)
+                    if (SiteId <= 0)
                         return BadRequest("ID da empresa não disponível no contexto.");
 
-                    var response = await business.SyncByFileAsync(stream, electionId, companyId);
+                    var response = await business.SyncByFileAsync(stream, electionId);
 
                     if (response.HasErrors)
                         return BadRequest(response.Messages);

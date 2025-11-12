@@ -1,6 +1,4 @@
-﻿
-
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TIVIT.CIPA.Api.Domain.Model;
 using Action = TIVIT.CIPA.Api.Domain.Model.Action;
@@ -12,8 +10,51 @@ namespace TIVIT.CIPA.Api.Domain.Repositories.Config
         public void Configure(EntityTypeBuilder<Candidate> builder)
         {
             builder.ToTable("Candidate");
-            builder.HasKey(a => a.Id);
-            builder.Property(a => a.PhotoBase64).HasColumnType("VARBINARY(MAX)");
+
+            builder.HasKey(c => c.Id)
+                   .HasName("PK_Candidate");
+
+            builder.Property(c => c.ElectionId)
+                   .IsRequired();
+
+            builder.Property(c => c.VoterID)
+                   .IsRequired();
+
+            builder.Property(c => c.SiteId)
+                   .IsRequired();
+
+            builder.Property(c => c.PhotoBase64)
+                   .HasColumnType("VARBINARY(MAX)");
+
+            builder.Property(c => c.PhotoMimeType)
+                   .HasMaxLength(50);
+
+            builder.Property(c => c.IsActive)
+                   .HasDefaultValue(true);
+
+            builder.Property(c => c.CreateDate)
+                   .HasDefaultValueSql("GETDATE()");
+
+            builder.Property(c => c.CreateUser)
+                   .HasMaxLength(200);
+
+            builder.Property(c => c.UpdateUser)
+                   .HasMaxLength(200);
+
+            builder.HasOne(c => c.Election)
+                   .WithMany(e => e.Candidates)
+                   .HasForeignKey(c => c.ElectionId)
+                   .HasConstraintName("FK_Candidate_Election");
+
+            builder.HasOne(c => c.Voter)
+                   .WithMany(v => v.Candidates)
+                   .HasForeignKey(c => c.VoterID)
+                   .HasConstraintName("FK_Candidate_Voter");
+
+            builder.HasOne(c => c.Site)
+                   .WithMany()
+                   .HasForeignKey(c => c.SiteId)
+                   .HasConstraintName("FK_Candidate_Site");
         }
     }
 }

@@ -23,7 +23,7 @@ namespace TIVIT.CIPA.Api.Security
 
         public string Role => _httpContext.GetRole();
 
-        public int CompanyId
+        public int SiteID
         {
             get
             {

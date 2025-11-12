@@ -32,7 +32,7 @@ namespace TIVIT.CIPA.Api.Domain.Repositories.Context
         public DbSet<Voter> Voters { get; set; }
 
         //cadastros, dominios e configurações
-        public DbSet<Site> Sites { get; set; }
+        public DbSet<Site> Sites { get; set; } 
 
         private readonly DatabaseSettings _databaseSettings;
         private readonly IUserInfo _userInfo;
@@ -44,7 +44,7 @@ namespace TIVIT.CIPA.Api.Domain.Repositories.Context
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
-            => options.UseSqlServer(_databaseSettings.ConnectionString)
+            => options.UseSqlServer(_databaseSettings.StringConnection)
                       .LogTo(Console.WriteLine, LogLevel.Information)
                       .ConfigureWarnings(w => w.Ignore(SqlServerEventId.DecimalTypeDefaultWarning));
 
@@ -63,6 +63,7 @@ namespace TIVIT.CIPA.Api.Domain.Repositories.Context
             modelBuilder.ApplyConfiguration(new ElectionSiteConfig());
             modelBuilder.ApplyConfiguration(new CandidateConfig());
             modelBuilder.ApplyConfiguration(new VoterConfig());
+            modelBuilder.ApplyConfiguration(new VoterActionConfig());
 
             modelBuilder.ApplyConfiguration(new SiteConfig());
 

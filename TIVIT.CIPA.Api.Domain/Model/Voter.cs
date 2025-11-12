@@ -4,17 +4,17 @@
     {
         public int Id { get; set; }
         public int ElectionId { get; set; }
-        public int CompanyId { get; set; }
-        public int? ProfileId { get; set; }
-        public string Registry { get; set; }
+        public int SiteId { get; set; }
+        public int ProfileId { get; set; }
+        public string CorporateId { get; set; }
         public string Name { get; set; }
-        public string JobTitle { get; set; }
         public string Email { get; set; }
         public string CorporateEmail { get; set; }
-        public string ContactEmail { get; set; }
         public string CorporatePhone { get; set; }
         public string ContactPhone { get; set; }
-        public string Site { get; set; }
+        public DateTime BirthDate { get; set; }
+        public string Area { get; set; }
+
         public string Department { get; set; }
         public string Token { get; set; }
         public bool HasVoted { get; set; }
@@ -27,11 +27,11 @@
         public DateTime? UpdateDate { get; set; }
         public string UpdateUser { get; set; }
 
-        public virtual Election Election { get; set; }
-        public virtual Company Company { get; set; }
-        public virtual Profile Profile { get; set; }
-        public virtual ICollection<Candidate> Candidates { get; set; }
-        public virtual ICollection<VoterAction> VoterActions { get; set; }
+        public Site Site { get; set; }
+        public Profile Profile { get; set; }
+        public Election Election { get; set; }
+        public ICollection<Candidate> Candidates { get; set; } = new List<Candidate>();
+        public ICollection<VoterAction> VoterActions { get; set; } = new List<VoterAction>();
         public virtual ICollection<TokenSend> TokensSent { get; set; }
     }
 }

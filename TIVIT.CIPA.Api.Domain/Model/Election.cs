@@ -13,21 +13,21 @@
         public DateTime? RegistrationEndDate { get; set; }
         public DateTime? ElectionStartDate { get; set; }
         public DateTime? ElectionEndDate { get; set; }
-        public string Type { get; set; } // Regular, Emergency
+
+        public string Type { get; set; }
         public string InvitationMessage { get; set; }
-        public bool IsActive { get; set; }
+        public bool IsActive { get; set; } = true;
         public DateTime? CreateDate { get; set; }
         public string CreateUser { get; set; }
         public DateTime? UpdateDate { get; set; }
         public string UpdateUser { get; set; }
 
-
-        public virtual Company Company { get; set; }
-        public virtual ICollection<Voter> Voters { get; set; }
-        public virtual ICollection<Candidate> Candidates { get; set; }
-        public virtual ICollection<Vote> Votes { get; set; }
+        public ICollection<Candidate> Candidates { get; set; } = new List<Candidate>();
+        public ICollection<ElectionSite> ElectionSites { get; set; } = new List<ElectionSite>();
+        public ICollection<Voter> Voters { get; set; } = new List<Voter>();
+        public ICollection<Vote> Votes { get; set; } = new List<Vote>();
+        
         public virtual ICollection<VoteLog> VoteLogs { get; set; }
         public virtual ICollection<ExclusionLog> ExclusionLogs { get; set; }
-        public virtual ICollection<ElectionSite> ElectionSites { get; set; }
     }
 }
