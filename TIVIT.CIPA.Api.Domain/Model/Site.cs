@@ -10,7 +10,6 @@
 
         public virtual Company Company { get; set; }
         public ICollection<Voter> Voters { get; set; }
-        public virtual ICollection<Candidate> Candidates { get; set; }
         public virtual ICollection<ElectionSite> ElectionSites { get; set; }
     }
 }

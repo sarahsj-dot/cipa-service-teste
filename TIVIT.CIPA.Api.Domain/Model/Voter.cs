@@ -13,6 +13,7 @@
         public string CorporatePhone { get; set; }
         public string ContactPhone { get; set; }
         public DateTime BirthDate { get; set; }
+        public DateTime? AdmissionDate { get; set; }
         public string Area { get; set; }
 
         public string Department { get; set; }

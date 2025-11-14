@@ -7,6 +7,7 @@ namespace TIVIT.CIPA.Api.Domain.Interfaces.Business
     public interface ICandidateBusiness
     {
         Task<Response<CandidateDetailResponse>> GetByIdAsync(int id);
+        Task<Response<CandidateVerifyResponse>> GetVoterByCorporateIdandElectionIdAsync(int electionId, string corporateId);
         Task<Response<IEnumerable<CandidateDetailResponse>>> GetByElectionIdAsync(int electionId);
         Task<Response<IEnumerable<CandidateResumeResponse>>> SearchCandidateAsync(string name, int electionId, int? siteId = null, string? corporateId = null, string? department = null);
         Task<Response<int>> CreateAsync(CandidateCreateRequest createRequest);

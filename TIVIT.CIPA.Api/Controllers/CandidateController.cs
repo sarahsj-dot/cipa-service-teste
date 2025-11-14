@@ -58,6 +58,24 @@ namespace TIVIT.CIPA.Api.Controllers
             return Ok(response.Data);
         }
 
+
+        [HttpGet("validateCandidate")]
+#if !DEBUG
+        [Action("adm_candidato", "consultar_candidato")]
+#endif
+        public async Task<ActionResult<CandidateVerifyResponse>> GetByCorporateIdandElectionIdAsync(
+            [FromQuery] int electionId,
+            [FromQuery] string? corporateId
+            )
+        {
+            var response = await business.GetVoterByCorporateIdandElectionIdAsync(electionId, corporateId);
+
+            if (response.HasErrors)
+                return BadRequest(response.Messages);
+
+            return Ok(response.Data);
+        }
+
         [HttpGet("search")]
 #if !DEBUG
         [Action("adm_candidato", "consultar_candidato")]

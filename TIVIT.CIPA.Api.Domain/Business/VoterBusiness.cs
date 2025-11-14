@@ -51,9 +51,24 @@ namespace TIVIT.CIPA.Api.Domain.Business
             response.Data = new VoterDetailResponse()
             {
                 Id = voter.Id,
-                ElectionId = voter.ElectionId,
+                ElectionId = voter.ElectionId,  
+                SiteId = voter.SiteId,
+                ProfileId = voter.ProfileId,
+                CorporateId = voter.CorporateId,
                 Name = voter.Name,
                 Email = voter.Email,
+                CorporateEmail = voter.CorporateEmail,
+                CorporatePhone = voter.CorporatePhone,
+                ContactPhone = voter.ContactPhone,
+                BirthDate = voter.BirthDate,
+                AdmissionDate = voter.AdmissionDate,
+                Area = voter.Area,
+                Department = voter.Department,
+                Token = voter.Token,
+                HasVoted = voter.HasVoted,
+                ExclusionReason = voter.ExclusionReason,
+                ExclusionDate = voter.ExclusionDate,
+                ExcludedBy = voter.ExcludedBy,
                 IsActive = voter.IsActive
             };
 

@@ -44,7 +44,7 @@ namespace TIVIT.CIPA.Api.Domain.Repositories.Context
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
-            => options.UseSqlServer(_databaseSettings.StringConnection)
+            => options.UseSqlServer("Server=DESKTOP-7G3Q513;Database=CIPA;User Id=sa;Password=root;TrustServerCertificate=True")
                       .LogTo(Console.WriteLine, LogLevel.Information)
                       .ConfigureWarnings(w => w.Ignore(SqlServerEventId.DecimalTypeDefaultWarning));
 

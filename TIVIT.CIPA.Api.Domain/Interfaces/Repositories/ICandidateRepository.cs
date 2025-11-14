@@ -8,6 +8,8 @@ namespace TIVIT.CIPA.Api.Domain.Interfaces.Repositories
 
         Task<IEnumerable<Candidate>> GetByElectionIdAsync(int electionId);
 
+        Task<Candidate> GetByCorporateIdandElectionIdAsync(int electionId, string corporateId);
+
         Task<IEnumerable<Candidate>> SearchAsync(string name, int electionId, int? siteId = null, string? corporateId = null, string? department = null);
 
         Task UpdateAsync(Candidate candidate);

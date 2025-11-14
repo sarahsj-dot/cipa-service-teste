@@ -12,6 +12,7 @@ namespace TIVIT.CIPA.Api.Domain.Validators
     {
         private readonly ICandidateRepository _candidateRepository;
         private readonly IStringLocalizer<SharedResource> _localizer;
+        private readonly IVoterRepository _voterRepository;
 
         private const int MaxImageSizeBytes = 3 * 1024 * 1024; // 3 MB
         private static readonly string[] AllowedMimeTypes = { "image/jpeg", "image/jpg", "image/png" };
@@ -29,7 +30,6 @@ namespace TIVIT.CIPA.Api.Domain.Validators
             AddNotifications(new Contract<CandidateCreateRequest>()
                 .Requires()
                 .IsNotNullOrWhiteSpace(request.CorporateId, "CorporateId", "Matricula é obrigatório")
-                .IsGreaterThan(request.ElectionId, 0, "ElectionId", "ElectionId inválido")
                 .IsNotNullOrWhiteSpace(request.PhotoBase64, "Foto", "Foto do candidato é obrigatório")
             );
 
@@ -51,7 +51,6 @@ namespace TIVIT.CIPA.Api.Domain.Validators
             AddNotifications(new Contract<CandidateUpdateRequest>()
                 .Requires()
                 .IsNotNullOrWhiteSpace(request.CorporateId, "CorporateId", "Matricula é obrigatório")
-                .IsGreaterThan(request.ElectionId, 0, "ElectionId", "ElectionId inválido")
                 .IsNotNullOrWhiteSpace(request.PhotoBase64, "Foto", "Foto do candidato é obrigatório")
             );
 
